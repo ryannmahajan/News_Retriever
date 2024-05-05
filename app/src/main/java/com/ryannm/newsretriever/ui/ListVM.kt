@@ -18,10 +18,29 @@ class ListVM(
     private val _loading = MutableStateFlow(true)
     val loading = _loading.asStateFlow()
 
+    private val _ascending = MutableStateFlow<Boolean?>(null)
+    val ascending = _ascending.asStateFlow()
+
     init {
+        changeNewsItemsBy { NewsRepository.getNewsArticles() }
+    }
+
+    private fun changeNewsItemsBy(fn: suspend (List<NewsItemModel>)->List<NewsItemModel>) {
         viewModelScope.launch {
-            _newsItemModels.value = NewsRepository.get()
+            _loading.value = true
+            _newsItemModels.value = fn(_newsItemModels.value)
             _loading.value = false
         }
     }
+
+    fun setAscending(b: Boolean) {
+        if (b==ascending.value) return
+        _ascending.value = b
+
+        changeNewsItemsBy { list ->
+            if (b) list.sortedBy { it.publishedAt }
+            else list.sortedByDescending { it.publishedAt }
+        }
+    }
+
 }

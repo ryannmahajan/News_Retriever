@@ -18,7 +18,7 @@ class NewsRepositoryTests {
     @Test
     fun returnAString() {
         runBlocking {
-            NewsRepository.get()
+            NewsRepository.getNewsArticles()
         }
     }
 
